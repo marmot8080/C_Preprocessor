@@ -191,10 +191,10 @@ void preprocessFile(char* filePath) {
                                 char tmp[MAX_LEN];
                                 char* context = NULL;
 
-                                strcpy_s(tmp, strtok_s(buf, "\"", &context));
+                                strcpy_s(tmp, MAX_LEN, strtok_s(buf, "\"", &context));
                                 strcat_s(tmp, "\"");
                                 strcat_s(tmp, headerPath);
-                                strcat_s(tmp, strtok_s(NULL, "\"", &context));
+                                strcat_s(tmp, MAX_LEN, strtok_s(NULL, "\"", &context));
                                 strcat_s(tmp, "\"\n");
 
                                 strcpy_s(buf, MAX_LEN, tmp);
@@ -298,15 +298,15 @@ int main() {
         strcat_s(ppFileName, fileType);
         if (fopen_s(&ppFile, ppFileName, "w") == 0) {
             while (fgets(buf, MAX_LEN, file) != NULL) {
-                // 헤더파일가 상대경로일시 해당 파일의 경로를 기준으로 절대경로로 수정하여 복사
+                // 헤더파일이 상대경로일시 해당 파일의 경로를 기준으로 절대경로로 수정하여 복사
                 if (strstr(buf, "#include") != NULL && strstr(buf, ".h\"") != NULL && strstr(buf, "\\") == NULL) {
                     char tmp[MAX_LEN];
                     context = NULL;
 
-                    strcpy_s(tmp, strtok_s(buf, "\"", &context));
+                    strcpy_s(tmp, MAX_LEN, strtok_s(buf, "\"", &context));
                     strcat_s(tmp, "\"");
                     strcat_s(tmp, MAX_LEN, extractFilePath(ppFileName));
-                    strcat_s(tmp, strtok_s(NULL, "\"", &context));
+                    strcat_s(tmp, MAX_LEN, strtok_s(NULL, "\"", &context));
                     strcat_s(tmp, "\"\n");
 
                     strcpy_s(buf, MAX_LEN, tmp);
