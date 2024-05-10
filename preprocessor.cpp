@@ -4,7 +4,7 @@
 
 #define MAX_LEN 128
 
-// 이미 include된 라이브러리가 포함된 스택
+// 이미 include된 라이브러리를 저장하는 스택
 typedef struct IncludedStack {
     char library[MAX_LEN];
     struct IncludedStack* next;
@@ -19,15 +19,6 @@ void push(char* library) {
 
     node->next = includedTop;
     includedTop = node;
-}
-
-iStack* pop() {
-    iStack* node = (iStack*)malloc(sizeof(iStack));
-
-    node = includedTop;
-    includedTop = includedTop->next;
-
-    return node;
 }
 
 // iStack 메모리 해제
