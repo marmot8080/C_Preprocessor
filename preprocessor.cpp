@@ -45,6 +45,30 @@ bool isIncluded(char* library) {
     return false;
 }
 
+bool acceptInclude(char* line) {
+    if (strstr(line, "#include") == NULL) return false;
+
+    char macro[MAX_LEN];
+    char postfix[3];
+
+    strncpy_s(macro, line, 8);
+    strncpy_s(postfix, line + strlen(line) - 3, 3);
+
+    if (strcmp(macro, "#include") == 0 && strcmp(postfix, ".h\"") == 0) return true;
+    else return false;
+}
+
+bool acceptDefine(char* line) {
+    if (strstr(line, "#define") == NULL) return false;
+
+    char macro[MAX_LEN];
+
+    strncpy_s(macro, line, 7);
+
+    if (strcmp(macro, "#define") == 0) return true;
+    else return false;
+}
+
 // 파일 경로 + 파일 이름 -> 파일 경로 추출
 char* extractFilePath(char* fileName) {
     int copySize = 0;
@@ -154,7 +178,7 @@ void preprocessFile(char* filePath) {
 
     if (fopen_s(&ppFile, filePath, "r+") == 0) {
         while (fgets(buf, MAX_LEN, ppFile) != NULL) {
-            if (strstr(buf, "#include") != NULL && strstr(buf, ".h\"") != NULL) {
+            if (acceptInclude(buf)) {
                 char headerFile[MAX_LEN];
                 char headerName[MAX_LEN] = "";
                 char headerPath[MAX_LEN] = "";
@@ -178,7 +202,7 @@ void preprocessFile(char* filePath) {
                     if (fopen_s(&hFile, headerFile, "r") == 0) {
                         while (fgets(buf, MAX_LEN, hFile) != NULL) {
                             // 헤더파일가 상대경로일시 해당 파일의 경로를 기준으로 절대경로로 수정하여 복사
-                            if (strstr(buf, "#include") != NULL && strstr(buf, ".h\"") != NULL && strstr(buf, "\\") == NULL) {
+                            if (acceptInclude(buf) && strstr(buf, "\\") == NULL) {
                                 char tmp[MAX_LEN];
                                 char* context = NULL;
 
@@ -211,7 +235,7 @@ void preprocessFile(char* filePath) {
                     }
                 }
             }
-            else if (strstr(buf, "#define") != NULL) {
+            else if (acceptDefine(buf)) {
                 char var[MAX_LEN];
                 char val[MAX_LEN];
                 char tmp[MAX_LEN];
@@ -224,7 +248,7 @@ void preprocessFile(char* filePath) {
 
                 // var -> val 대체
                 while (fgets(buf, MAX_LEN, ppFile) != NULL) {
-                    if (strstr(buf, "#define") != NULL && strstr(buf, var) != NULL) { // 다른 #define문과 var 이름이 겹칠 경우 예외처리
+                    if (acceptDefine(buf) && strstr(buf, var) != NULL) { // 다른 #define문과 var 이름이 겹칠 경우 예외처리
                         fputs(buf, tmpFile);
                         while (fgets(buf, MAX_LEN, ppFile) != NULL) fputs(buf, tmpFile);
                         break;
@@ -290,7 +314,7 @@ int main() {
         if (fopen_s(&ppFile, ppFileName, "w") == 0) {
             while (fgets(buf, MAX_LEN, file) != NULL) {
                 // 헤더파일이 상대경로일시 해당 파일의 경로를 기준으로 절대경로로 수정하여 복사
-                if (strstr(buf, "#include") != NULL && strstr(buf, ".h\"") != NULL && strstr(buf, "\\") == NULL) {
+                if (acceptInclude(buf) && strstr(buf, "\\") == NULL) {
                     char tmp[MAX_LEN];
                     context = NULL;
 
